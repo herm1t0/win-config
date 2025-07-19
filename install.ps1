@@ -19,3 +19,4 @@ function Test-ScriptIntegrity {
 
 }
 Test-ScriptIntegrity
+Write-Host "Done"
