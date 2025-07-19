@@ -1,7 +1,7 @@
 function Test-ScriptIntegrity {
     $scriptUrl = "https://raw.githubusercontent.com/herm1t0/win-config/refs/heads/main/install.ps1"
     $hashUrl = "https://raw.githubusercontent.com/herm1t0/win-config/refs/heads/main/releaseHash"
-    $releaseHash = Invoke-WebRequest -Uri $hashUrl -UseBasicParsing
+    $releaseHash = (Invoke-WebRequest -Uri $hashUrl -UseBasicParsing).Content.Trim()
     $scriptContent = Invoke-WebRequest -Uri $scriptUrl -UseBasicParsing
 
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($scriptContent)
