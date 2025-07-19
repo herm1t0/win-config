@@ -18,3 +18,4 @@ function Test-ScriptIntegrity {
 
 
 }
+Test-ScriptIntegrity
