@@ -179,24 +179,25 @@ function Install-WinGet {
 }
 
 function Test-ScriptIntegrity {
-    Write-Host "Testing script hash integrity..." -ForegroundColor Yellow
-    $scriptUrl = "https://raw.githubusercontent.com/herm1t0/win-config/refs/heads/main/install.ps1"
-    $hashUrl = "https://raw.githubusercontent.com/herm1t0/win-config/refs/heads/main/releaseHash"
-    $releaseHash = Invoke-RestMethod -Uri $hashUrl
-    $scriptContent = Invoke-RestMethod -Uri $scriptUrl
+    try {
+        Write-Host "Testing script hash integrity..." -ForegroundColor Yellow
+        $scriptUrl = "https://raw.githubusercontent.com/herm1t0/win-config/refs/heads/main/install.ps1"
+        $hashUrl = "https://raw.githubusercontent.com/herm1t0/win-config/refs/heads/main/releaseHash"
+        $releaseHash = (Invoke-RestMethod -Uri $hashUrl).Trim()
+        $scriptContent = Invoke-RestMethod -Uri $scriptUrl
 
-    $bytes = [System.Text.Encoding]::UTF8.GetBytes($scriptContent)
-    $hash = [System.BitConverter]::ToString([System.Security.Cryptography.SHA256]::Create().ComputeHash($bytes)).Replace("-", "")
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes($scriptContent)
+        $hash = [System.BitConverter]::ToString([System.Security.Cryptography.SHA256]::Create().ComputeHash($bytes)).Replace("-", "")
+        Write-Host $releaseHash
+        Write-Host $hash
 
-    Write-Host $releaseHash
-    Write-Host $hash
-    Read-Host
-
-    if ($releaseHash -ne $hash) {
+        return ($releaseHash -eq $hash)
+    }
+    catch {
+        Write-Warning "Error testing script integrity: $_"
         return $false
     }
-
-    return $true
+    
 }
 
 function Set-GitUserVars {
