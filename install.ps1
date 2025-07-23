@@ -188,13 +188,11 @@ function Test-ScriptIntegrity {
 
         $bytes = [System.Text.Encoding]::UTF8.GetBytes($scriptContent)
         $hash = [System.BitConverter]::ToString([System.Security.Cryptography.SHA256]::Create().ComputeHash($bytes)).Replace("-", "")
-        Write-Host $releaseHash
-        Write-Host $hash
 
         return ($releaseHash -eq $hash)
     }
     catch {
-        Write-Warning "Error testing script integrity: $_"
+        Write-Error "Error: $_"
         return $false
     }
     
@@ -209,6 +207,30 @@ function Set-GitUserVars {
     )
     git config --global user.name $Name
     git config --global user.email $Email
+}
+
+function Set-WindowsDefenderStatus {
+    param (
+        [Parameter(Mandatory = $true, HelpMessage = "Enabled - true/false")]
+        [bool] $Enabled
+    )
+    $output = "$env:TEMP\defender-control.exe"
+    if ($Enabled) { 
+        $url = "https://github.com/pgkt04/defender-control/releases/latest/download/enable-defender.exe" 
+    }
+    else {
+        $url = "https://github.com/pgkt04/defender-control/releases/latest/download/disable-defender.exe" 
+    }
+
+    try {
+        Write-Host "Working on Windows Defender..." -ForegroundColor Yellow
+        Invoke-RestMethod -Uri $url -OutFile $output -UseBasicParsing -ErrorAction Stop
+        Start-Process -FilePath $output -Wait
+        Remove-Item $output -Force
+    }
+    catch {
+        Write-Error "Error: $_"
+    }
 }
 
 function Main {
@@ -237,6 +259,7 @@ function Main {
     foreach ($app in $AppList) { if (!(Install-Application -App $app)) { break } }
 
     Set-GitUserVars
+    Set-WindowsDefenderStatus -Enabled $false
 
     Invoke-RestMethod "https://christitus.com/win" | Invoke-Expression -ErrorAction Stop
 
