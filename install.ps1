@@ -216,7 +216,10 @@ function Main {
 
     if (!(Test-InternetConnection)) { break }
 
-    if (!(Test-ScriptIntegrity)) { Write-Warning "Hash ($hash) mismatch! Aborting..." break }
+    if (!(Test-ScriptIntegrity)) {
+        Write-Warning "Hash mismatch! Aborting..."
+        break
+    }
     Write-Host "Successfully verified script hash" -ForegroundColor Yellow
 
     if (!(Test-WindowsActivation)) { if (!(Install-WindowsActivation)) { break } }
