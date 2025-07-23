@@ -172,7 +172,7 @@ function Install-WinGet {
     }
     catch {
         Write-Error "Error: $_"
-        return $false # Failure 
+        return $false # Failure
     }
 }
 
@@ -186,74 +186,52 @@ function Test-ScriptIntegrity {
     $hash = [System.BitConverter]::ToString([System.Security.Cryptography.SHA256]::Create().ComputeHash($bytes)).Replace("-", "")
 
     if ($releaseHash -ne $hash) {
-        Write-Warning "Hash ($hash) mismatch! Aborting..."
         return $false
     }
-    else {
-        Write-Host "Successfully verified script hash" -ForegroundColor Yellow
-        return $true
-    }
+
+    return $true
 }
 
-function Install-PowerShellProfile {
-    try {
-        Write-Host "Installing PowerShell profile..." -ForegroundColor Yellow
-        Invoke-RestMethod "https://github.com/ChrisTitusTech/powershell-profile/raw/main/setup.ps1" | Invoke-Expression -ErrorAction Stop
-        return $true
-    }
-    catch {
-        Write-Error "Error: $_"
-        return $false
-    }
+function Set-GitUserVars {
+    param (
+        [Parameter(Mandatory = $true, HelpMessage = "Enter the git user.name")]
+        [string] $Name,
+        [Parameter(Mandatory = $true, HelpMessage = "Enter the git user.email")]
+        [string] $Email
+    )
+    git config --global user.name $Name
+    git config --global user.email $Email
 }
 
 function Main {
 
     if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-        Write-Warning "Script needs to be run as Administrator"
-        Pause
+        Write-Warning "Script needs to be run as Administrator!"
+        Write-Host "Press any key to exit."
+        Read-Host
         break
     }
 
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-    if (!(Test-InternetConnection)) {
-        break
-    }
+    if (!(Test-InternetConnection)) { break }
 
-    if (!(Test-ScriptIntegrity)) {
-        break
-    }
+    if (!(Test-ScriptIntegrity)) { Write-Warning "Hash ($hash) mismatch! Aborting..." break }
+    Write-Host "Successfully verified script hash" -ForegroundColor Yellow
 
-    if (!(Test-WindowsActivation)) {
-        if (!(Install-WindowsActivation)) {
-            break
-        }
-    }
+    if (!(Test-WindowsActivation)) { if (!(Install-WindowsActivation)) { break } }
 
-    if (!(Test-WinGetInstallation)) {
-        if (!(Install-WinGet)) {
-            break
-        }
-    }
+    if (!(Test-WinGetInstallation)) { if (!(Install-WinGet)) { break } }
 
-    foreach ($app in $AppList) {
-        if (!(Install-Application -App $app)) {
-            break
-        }
-    }
+    foreach ($app in $AppList) { if (!(Install-Application -App $app)) { break } }
 
-    #Activate Ultimate Performance power plan
-    powercfg /setactive "e9a42b02-d5df-448d-aa00-03f14749eb61"
-    # Set dark mode for system UI
-    Set-ItemProperty -Path HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize -Name SystemUsesLightTheme -Value 0 -Type Dword -Force
-    # Set dark mode for apps
-    Set-ItemProperty -Path HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize -Name AppsUseLightTheme -Value 0 -Type Dword -Force
+    Set-GitUserVars
 
-    #Install-PowerShellProfile
+    Invoke-RestMethod "https://christitus.com/win" | Invoke-Expression -ErrorAction Stop
 
     Write-Host "Script execution succeeded." -ForegroundColor Yellow
-    Pause
+    Write-Host "Press any key to exit."
+    Read-Host
 }
 
 Main
