@@ -115,8 +115,9 @@ function Install-Application {
     }
 }
 function Test-InternetConnection {
+    Write-Host "Testing internet connection..." -ForegroundColor Yellow
     try {
-        Test-Connection -ComputerName www.google.com -Count 1 -ErrorAction Stop | Out-Null
+        Test-Connection -ComputerName www.google.com -Count 3 -Delay 1 -ErrorAction Stop | Out-Null
         return $true
     }
     catch {
@@ -150,6 +151,7 @@ function Install-WindowsActivation {
 }
 
 function Test-WinGetInstallation {
+    Write-Host "Testing WinGet installation..." -ForegroundColor Yellow
     try {
         winget --version
         return $true
@@ -177,6 +179,7 @@ function Install-WinGet {
 }
 
 function Test-ScriptIntegrity {
+    Write-Host "Testing script hash integrity..." -ForegroundColor Yellow
     $scriptUrl = "https://raw.githubusercontent.com/herm1t0/win-config/refs/heads/main/install.ps1"
     $hashUrl = "https://raw.githubusercontent.com/herm1t0/win-config/refs/heads/main/releaseHash"
     $releaseHash = Invoke-RestMethod -Uri $hashUrl
@@ -184,6 +187,10 @@ function Test-ScriptIntegrity {
 
     $bytes = [System.Text.Encoding]::UTF8.GetBytes($scriptContent)
     $hash = [System.BitConverter]::ToString([System.Security.Cryptography.SHA256]::Create().ComputeHash($bytes)).Replace("-", "")
+
+    Write-Host $releaseHash
+    Write-Host $hash
+    Read-Host
 
     if ($releaseHash -ne $hash) {
         return $false
