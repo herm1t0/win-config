@@ -1,169 +1,159 @@
-enum AppSource {
-    WinGet
-    #Scoop
-}
-
 $AppList = @(
     # WinGet apps
     [PSCustomObject] @{
-        Name   = "DirectX"
-        ID     = "Microsoft.DirectX"
-        Source = [AppSource]::WinGet
+        Name = "DirectX"
+        ID   = "Microsoft.DirectX"
     }
     [PSCustomObject] @{
-        Name   = "Microsoft Visual C++ 2015-2022"
-        ID     = "Microsoft.VCRedist.2015+.x64"
-        Source = [AppSource]::WinGet
+        Name = "Microsoft Visual C++ 2015-2022"
+        ID   = "Microsoft.VCRedist.2015+.x64"
     }
     [PSCustomObject] @{
-        Name   = "PowerShell 7"
-        ID     = "Microsoft.PowerShell"
-        Source = [AppSource]::WinGet
+        Name = "PowerShell 7"
+        ID   = "Microsoft.PowerShell"
     }
     [PSCustomObject] @{
-        Name   = "WindowsTerminal"
-        ID     = "Microsoft.WindowsTerminal"
-        Source = [AppSource]::WinGet
+        Name = "WindowsTerminal"
+        ID   = "Microsoft.WindowsTerminal"
     }
     [PSCustomObject] @{
-        Name   = "MozillaFirefox"
-        ID     = "Mozilla.Firefox"
-        Source = [AppSource]::WinGet
+        Name = "MozillaFirefox"
+        ID   = "Mozilla.Firefox"
     }
     [PSCustomObject] @{
-        Name   = "MsiAfterburner"
-        ID     = "Guru3D.Afterburner"
-        Source = [AppSource]::WinGet
+        Name = "MsiAfterburner"
+        ID   = "Guru3D.Afterburner"
     }
     [PSCustomObject] @{
-        Name   = "NVCleanstall"
-        ID     = "TechPowerUp.NVCleanstall"
-        Source = [AppSource]::WinGet
+        Name = "NVCleanstall"
+        ID   = "TechPowerUp.NVCleanstall"
     }
     [PSCustomObject] @{
-        Name   = "GoodbyeDPI UI"
-        ID     = "Storik4pro.GoodbyeDPI-UI"
-        Source = [AppSource]::WinGet
+        Name = "GoodbyeDPI UI"
+        ID   = "Storik4pro.GoodbyeDPI-UI"
     }
     [PSCustomObject] @{
-        Name   = "NanaZip"
-        ID     = "M2Team.NanaZip"
-        Source = [AppSource]::WinGet
+        Name = "NanaZip"
+        ID   = "M2Team.NanaZip"
     }
     [PSCustomObject] @{
-        Name   = "UniGetUI"
-        ID     = "MartiCliment.UniGetUI"
-        Source = [AppSource]::WinGet
+        Name = "UniGetUI"
+        ID   = "MartiCliment.UniGetUI"
     }
     [PSCustomObject] @{
-        Name   = "StartIsBack++"
-        ID     = "StartIsBack.StartIsBack"
-        Source = [AppSource]::WinGet
+        Name = "StartIsBack++"
+        ID   = "StartIsBack.StartIsBack"
     }
     [PSCustomObject] @{
-        Name   = "MPC-HC"
-        ID     = "clsid2.mpc-hc"
-        Source = [AppSource]::WinGet
+        Name = "MPC-HC"
+        ID   = "clsid2.mpc-hc"
     }
     [PSCustomObject] @{
-        Name   = "Git"
-        ID     = "Git.Git"
-        Source = [AppSource]::WinGet
+        Name = "Git"
+        ID   = "Git.Git"
     }
     [PSCustomObject] @{
-        Name   = "Visual Studio Code"
-        ID     = "Microsoft.VisualStudioCode"
-        Source = [AppSource]::WinGet
+        Name = "Visual Studio Code"
+        ID   = "Microsoft.VisualStudioCode"
     }
     [PSCustomObject] @{
-        Name   = "qBittorrent"
-        ID     = "qBittorrent.qBittorrent.lt2"
-        Source = [AppSource]::WinGet
+        Name = "qBittorrent"
+        ID   = "qBittorrent.qBittorrent.lt2"
     }
     [PSCustomObject] @{
-        Name   = "Oh My Posh"
-        ID     = "JanDeDobbeleer.OhMyPosh"
-        Source = [AppSource]::WinGet
+        Name = "Oh My Posh"
+        ID   = "JanDeDobbeleer.OhMyPosh"
     }
     [PSCustomObject] @{
-        Name   = "Flow Launcher"
-        ID     = "Flow-Launcher.low-Launcher"
-        Source = [AppSource]::WinGet
+        Name = "Flow Launcher"
+        ID   = "Flow-Launcher.low-Launcher"
+    }
+    [PSCustomObject] @{
+        Name = "Double Commander"
+        ID   = "alexx2000.DoubleCommander"
     }
 )
 
-function Install-Application {
+function Install-Application
+{
     param (
         [Parameter(Mandatory = $true)]
         [PSCustomObject]$App
     )
-    switch ($App.Source) {
-        ([AppSource]::WinGet) {
-            Write-Host "Now installing $($App.Name) via $($App.Source)" -ForegroundColor Yellow
-            winget install $App.ID
-            if ($LASTEXITCODE -ne 0 ) {
-                Write-Error "A error occurred while installing $($App.Name)."
-                return $false
-            }
-            Write-Host "$($App.Name) successfully installed."
-            return $true
-        }
-        Default {
-            Write-Error "Error: Unknown source $($App.Source)"
-            return $false
-        }
+    Write-Host "Now installing $($App.Name)" -ForegroundColor Yellow
+    winget install --id $App.ID --exact --source winget --accept-source-agreements --disable-interactivity --silent --accept-package-agreements --force
+    if ($LASTEXITCODE -ne 0 )
+    {
+        Write-Error "A error occurred while installing $($App.Name)."
+        return $false
     }
+    Write-Host "$($App.Name) successfully installed."
+    return $true
 }
-function Test-InternetConnection {
+function Test-InternetConnection
+{
     Write-Host "Testing internet connection..." -ForegroundColor Yellow
-    try {
+    try
+    {
         Test-Connection -ComputerName www.google.com -Count 3 -Delay 1 -ErrorAction Stop | Out-Null
         return $true
     }
-    catch {
+    catch
+    {
         Write-Warning "Internet connection isn't available. Please check your connection."
         return $false
     }
 }
 
-function Test-WindowsActivation {
+function Test-WindowsActivation
+{
     Write-Host "Testing Windows activation..." -ForegroundColor Yellow
-    if ((Get-CIMInstance -Query "SELECT * FROM SoftwareLicensingProduct WHERE LicenseStatus = 1").LicenseStatus) {
+    if ((Get-CIMInstance -Query "SELECT * FROM SoftwareLicensingProduct WHERE LicenseStatus = 1").LicenseStatus)
+    {
         return $true
     }
-    else {
+    else
+    {
         Write-Warning "Windows activation wasn't found."
         return $false
     }
 }
 
-function Install-WindowsActivation {
-    try {
+function Install-WindowsActivation
+{
+    try
+    {
         Write-Host "Starting Windows activation script..." -ForegroundColor Yellow
         Invoke-RestMethod https://get.activated.win | Invoke-Expression -ErrorAction Stop
         return $true
     }
-    catch {
+    catch
+    {
         Write-Error "Error: $_"
         return $false
     }
     
 }
 
-function Test-WinGetInstallation {
+function Test-WinGetInstallation
+{
     Write-Host "Testing WinGet installation..." -ForegroundColor Yellow
-    try {
+    try
+    {
         winget --version
         return $true
     }
-    catch {
+    catch
+    {
         Write-Warning "WinGet installation wasn't found."
         return $false
     }
 }
 
-function Install-WinGet {
-    try {
+function Install-WinGet
+{
+    try
+    {
         Write-Host "Installing WinGet PowerShell module from PSGallery..." -ForegroundColor Yellow
         Install-PackageProvider -Name NuGet -Force -ErrorAction Stop | Out-Null
         Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery -ErrorAction Stop | Out-Null
@@ -172,33 +162,15 @@ function Install-WinGet {
         Write-Host "WinGet installation is complete." -ForegroundColor Yellow
         return $true # Success
     }
-    catch {
+    catch
+    {
         Write-Error "Error: $_"
         return $false # Failure
     }
 }
 
-function Test-ScriptIntegrity {
-    try {
-        Write-Host "Testing script hash integrity..." -ForegroundColor Yellow
-        $scriptUrl = "https://raw.githubusercontent.com/herm1t0/win-config/refs/heads/main/install.ps1"
-        $hashUrl = "https://raw.githubusercontent.com/herm1t0/win-config/refs/heads/main/releaseHash"
-        $releaseHash = (Invoke-RestMethod -Uri $hashUrl).Trim()
-        $scriptContent = Invoke-RestMethod -Uri $scriptUrl
-
-        $bytes = [System.Text.Encoding]::UTF8.GetBytes($scriptContent)
-        $hash = [System.BitConverter]::ToString([System.Security.Cryptography.SHA256]::Create().ComputeHash($bytes)).Replace("-", "")
-
-        return ($releaseHash -eq $hash)
-    }
-    catch {
-        Write-Error "Error: $_"
-        return $false
-    }
-    
-}
-
-function Set-GitUserVars {
+function Set-GitUserVars
+{
     param (
         [Parameter(Mandatory = $true, HelpMessage = "Enter the git user.name")]
         [string] $Name,
@@ -209,33 +181,86 @@ function Set-GitUserVars {
     git config --global user.email $Email
 }
 
-function Set-WindowsDefenderStatus {
+function Set-WindowsDefenderStatus
+{
     param (
-        [Parameter(Mandatory = $true, HelpMessage = "Enabled - true/false")]
+        [Parameter(Mandatory = $true)]
         [bool] $Enabled
     )
     $output = "$env:TEMP\defender-control.exe"
-    if ($Enabled) { 
+    if ($Enabled)
+    { 
         $url = "https://github.com/pgkt04/defender-control/releases/latest/download/enable-defender.exe" 
     }
-    else {
+    else
+    {
         $url = "https://github.com/pgkt04/defender-control/releases/latest/download/disable-defender.exe" 
     }
 
-    try {
+    try
+    {
         Write-Host "Working on Windows Defender..." -ForegroundColor Yellow
         Invoke-RestMethod -Uri $url -OutFile $output -UseBasicParsing -ErrorAction Stop
         Start-Process -FilePath $output -Wait
         Remove-Item $output -Force
     }
-    catch {
+    catch
+    {
         Write-Error "Error: $_"
     }
 }
 
-function Main {
+function Set-DefaultFileManager
+{
+    param (
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("Explorer", "DoubleCommander")]
+        [string] $Name
+    )
 
-    if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    switch ($Name)
+    {
+        "Explorer"
+        { 
+            # Win + E hotkey bind
+            $regPath = "HKCU:\SOFTWARE\Classes\CLSID\{52205fd8-5dfb-447d-801a-d0b52f2e83e1}"
+            Remove-Item -Path $regPath -Recurse -Force
+
+            # Shell integration
+            Set-ItemProperty -Path "Registry::HKEY_CLASSES_ROOT\Drive\Shell" -Name "(Default)" -Value "none"
+            Remove-Item -Path "Registry::HKEY_CLASSES_ROOT\Drive\shell\open\command" -Recurse -Force
+            Set-ItemProperty -Path "Registry::HKEY_CLASSES_ROOT\Directory\shell" -Name "(Default)" -Value "none"
+            Remove-Item -Path "Registry::HKEY_CLASSES_ROOT\Directory\shell\open\command" -Recurse -Force
+
+        }
+        "DoubleCommander"
+        { 
+            # Win + E hotkey bind
+            $regPath = "HKCU:\SOFTWARE\Classes\CLSID\{52205fd8-5dfb-447d-801a-d0b52f2e83e1}"
+            New-Item -Path "$regPath\shell\opennewwindow\command" -Force
+            Set-ItemProperty -Path "$regPath\shell\opennewwindow\command" -Name "(Default)" -Value '"C:\Program Files\Double Commander\doublecmd.exe" "-C"'
+            Set-ItemProperty -Path "$regPath\shell\opennewwindow\command" -Name "DelegateExecute" -Value ""
+
+            # Shell integration
+            New-Item -Path "Registry::HKEY_CLASSES_ROOT\Drive\shell\open\command" -Force
+            New-Item -Path "Registry::HKEY_CLASSES_ROOT\Directory\shell\open\command" -Force
+            Set-ItemProperty -Path "Registry::HKEY_CLASSES_ROOT\Drive\Shell" -Name "(Default)" -Value "open"
+            Set-ItemProperty -Path "Registry::HKEY_CLASSES_ROOT\Directory\shell" -Name "(Default)" -Value "open"
+            Set-ItemProperty -Path "Registry::HKEY_CLASSES_ROOT\Drive\shell\open\command" -Name "(Default)" -Value 'C:\Program Files\Double Commander\doublecmd.exe -C -P L -T "%1"'
+            Set-ItemProperty -Path "Registry::HKEY_CLASSES_ROOT\Directory\shell\open\command" -Name "(Default)" -Value 'C:\Program Files\Double Commander\doublecmd.exe -C -P L -T "%1"'
+        }
+        Default
+        {
+            Write-Error "Error: $_"
+        }
+    }
+}
+
+function Main
+{
+
+    if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
+    {
         Write-Warning "Script needs to be run as Administrator!"
         Write-Host "Press any key to exit."
         Read-Host
@@ -246,20 +271,32 @@ function Main {
 
     if (!(Test-InternetConnection)) { break }
 
-    if (!(Test-ScriptIntegrity)) {
-        Write-Warning "Hash mismatch! Aborting..."
-        break
+    if (!(Test-WindowsActivation))
+    {
+        if (!(Install-WindowsActivation))
+        { 
+            break
+        }
     }
-    Write-Host "Successfully verified script hash" -ForegroundColor Yellow
 
-    if (!(Test-WindowsActivation)) { if (!(Install-WindowsActivation)) { break } }
+    if (!(Test-WinGetInstallation))
+    {
+        if (!(Install-WinGet))
+        {
+            break 
+        } 
+    }
 
-    if (!(Test-WinGetInstallation)) { if (!(Install-WinGet)) { break } }
-
-    foreach ($app in $AppList) { if (!(Install-Application -App $app)) { break } }
+    foreach ($app in $AppList)
+    {
+        if (!(Install-Application -App $app)) { continue } 
+    }
 
     Set-GitUserVars
+    
     Set-WindowsDefenderStatus -Enabled $false
+
+    Set-DefaultFileManager -Name DoubleCommander
 
     Invoke-RestMethod "https://christitus.com/win" | Invoke-Expression -ErrorAction Stop
 
