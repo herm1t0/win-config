@@ -41,10 +41,6 @@ $AppList = @(
         ID   = "MartiCliment.UniGetUI"
     }
     [PSCustomObject] @{
-        Name = "StartIsBack++"
-        ID   = "StartIsBack.StartIsBack"
-    }
-    [PSCustomObject] @{
         Name = "MPC-HC"
         ID   = "clsid2.mpc-hc"
     }
