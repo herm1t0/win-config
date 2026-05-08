@@ -17,8 +17,8 @@ $AppList = @(
         ID   = "Microsoft.WindowsTerminal"
     }
     [PSCustomObject] @{
-        Name = "MozillaFirefox"
-        ID   = "Mozilla.Firefox"
+        Name = "UngoogledChromium"
+        ID   = "eloston.ungoogled-chromium"
     }
     [PSCustomObject] @{
         Name = "MsiAfterburner"
@@ -62,11 +62,7 @@ $AppList = @(
     }
     [PSCustomObject] @{
         Name = "Flow Launcher"
-        ID   = "Flow-Launcher.low-Launcher"
-    }
-    [PSCustomObject] @{
-        Name = "Double Commander"
-        ID   = "alexx2000.DoubleCommander"
+        ID   = "Flow-Launcher.Flow-Launcher"
     }
 )
 
@@ -291,8 +287,6 @@ function Main
     Set-GitUserVars
     
     Set-WindowsDefenderStatus -Enabled $false
-
-    Set-DefaultFileManager -Name DoubleCommander
 
     Invoke-RestMethod "https://christitus.com/win" | Invoke-Expression -ErrorAction Stop
 
